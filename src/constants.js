@@ -3,7 +3,7 @@ const utmQueryParams =
 import pkgInfo from '../package.json';
 
 export const constants = {
-  userAgent: `WatermarkremoverioPlugin/${pkgInfo.version} Photoshop`,
+  userAgent: `WatermarkremoverioPlugin/${pkgInfo.version} (Photoshop)`,
   urls: {
     redirectToAppsPage: `https://console.pixelbin.io/choose-org?redirectTo=settings/apps&${utmQueryParams}`,
     redirectToDashboardPage: `https://console.pixelbin.io/choose-org?redirectTo=dashboard&${utmQueryParams}`,
