@@ -1,6 +1,6 @@
 {
   "name": "watermarkremover.io",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "scripts": {
     "watch": "nodemon -w src -e js,jsx,json,css,html -w webpack.config.js -x npm run build",
     "build": "webpack --mode development",
@@ -46,7 +46,7 @@
     "husky": "^8.0.0"
   },
   "dependencies": {
-    "@pixelbin/admin": "^3.8.0",
+    "@pixelbin/admin": "^4.0.3",
     "@pixelbin/core": "^5.4.0",
     "axios": "^1.6.2",
     "crypto-browserify": "^3.12.0",

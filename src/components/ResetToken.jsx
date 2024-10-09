@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PixelbinClient, PixelbinConfig } from '@pixelbin/admin';
-
 import { handle } from '../utils';
-import { WC } from './WC';
 import { constants } from '../constants';
+import { storage } from '../utils';
 
 const styles = {
   wrapper: { display: 'flex', gap: '1rem', flexDirection: 'column' },
@@ -13,12 +12,26 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
   },
+  hideText: {
+    color: 'white',
+    width: '34px',
+    fontWeight: '600',
+  },
+  inputBox: {
+    height: '28px',
+    padding: '6px 2px 0 2px',
+  },
   header: {
     display: 'flex',
     alignItems: 'center',
     margin: '1rem 0',
     color: 'var(--uxp-host-text-color)',
     fontSize: '20px',
+  },
+  inputWrapper: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   productImage: { marginRight: '0.5rem', height: '32px' },
   submitButton: { marginTop: '0.5rem' },
@@ -32,15 +45,33 @@ const styles = {
   },
 };
 
-export function Login({ setToken, setAppOrgDetails }) {
+export function ResetToken({ setToken, setAppOrgDetails }) {
   const [errorMessage, setErrorMessage] = useState('');
-  const [submitButtonDisabled, setSubmitButtonDisabled] = useState(false);
-  const [tokenInputValue, setTokenInputValue] = useState('');
+  const [tokenInputValue, setTokenInputValue] = useState(
+    storage.getItem('token')
+  );
+  const [isTypePassword, setIsTypePassword] = useState(true);
+  const textFieldRef = useRef(null);
+
+  useEffect(() => {
+    if (textFieldRef.current) {
+      // Directly set the type property
+      textFieldRef.current.type = isTypePassword ? 'password' : 'text';
+    }
+  }, [isTypePassword]);
+
+  useEffect(() => {
+    console.log('CHeck Length..', tokenInputValue);
+  }, [tokenInputValue]);
+
+  useEffect(() => {
+    return () => {
+      storage.setItem('isResetTokenOn', false);
+    };
+  }, []);
 
   const handleSubmitClick = async (e) => {
     e.preventDefault();
-
-    setSubmitButtonDisabled(true);
 
     const config = new PixelbinConfig({
       domain: constants.urls.apiDomain,
@@ -54,8 +85,6 @@ export function Login({ setToken, setAppOrgDetails }) {
       pixelbin.organization.getAppOrgDetails()
     );
 
-    setSubmitButtonDisabled(false);
-
     if (error?.code === 401) {
       setErrorMessage('Invalid Token');
       return;
@@ -63,6 +92,8 @@ export function Login({ setToken, setAppOrgDetails }) {
 
     setToken(tokenInputValue);
     setAppOrgDetails(appOrgDetails);
+    storage.setItem('isResetTokenOn', false);
+    location.reload();
   };
 
   const handleTokenInputValueChange = (e) => {
@@ -73,23 +104,34 @@ export function Login({ setToken, setAppOrgDetails }) {
     <div style={styles.wrapper}>
       <main style={styles.main}>
         <header style={styles.header}>
-          <img src="./icons/watermarkremover.png" style={styles.productImage} />
-          Login
+          <img src="./icons/erasebg.png" style={styles.productImage} />
+          Reset Token
         </header>
-        <WC onInput={handleTokenInputValueChange}>
-          <sp-textfield
+        <div style={styles.inputWrapper}>
+          <input
+            style={styles.inputBox}
+            type={isTypePassword ? 'password' : 'text'}
             name="token"
             placeholder="Enter API Token"
-            type="password"
-          ></sp-textfield>
-        </WC>
+            value={tokenInputValue}
+            onChange={handleTokenInputValueChange}
+          />
+          <div
+            onClick={() => setIsTypePassword(!isTypePassword)}
+            style={styles.hideText}
+          >
+            {isTypePassword ? 'Show' : 'Hide'}
+          </div>
+        </div>
+
         <sp-action-button
           style={styles.submitButton}
-          disabled={!tokenInputValue || submitButtonDisabled ? true : undefined}
+          disabled={!tokenInputValue ? true : undefined}
           onClick={handleSubmitClick}
         >
           Submit
         </sp-action-button>
+
         <sp-link
           quiet
           style={styles.apiTokenLink}
